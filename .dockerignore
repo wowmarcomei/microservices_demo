@@ -1,0 +1,23 @@
+# 忽略文件和目录
+.git
+.gitignore
+README.md
+README-Docker.md
+target/
+node_modules/
+logs/
+*.log
+.temp
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+*.class
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.rar
