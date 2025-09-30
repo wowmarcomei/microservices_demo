@@ -1,26 +1,7 @@
 server:
   port: 8082
 
-# 临时回退配置（如果Nacos配置不可用）
-spring:
-  application:
-    name: product-service
-  datasource:
-    url: jdbc:mysql://172.24.238.72:3306/product_db?useSSL=false&serverTimezone=UTC
-    username: root
-    password: my-secret-pw
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  redis:
-    host: 172.24.238.72
-    port: 6379
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 172.24.238.72:8848
-        namespace: public
-        group: DEFAULT_GROUP
-
-# 本地保留的核心配置
+# 核心配置（其他配置从Nacos加载）
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
   global-config:

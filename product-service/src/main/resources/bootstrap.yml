@@ -7,11 +7,9 @@ spring:
       server-addr: 172.24.238.72:8848
       discovery:
         server-addr: 172.24.238.72:8848
-        namespace: public
         group: DEFAULT_GROUP
       config:
         server-addr: 172.24.238.72:8848
-        namespace: public
         group: DEFAULT_GROUP
         file-extension: yml
         # 加载共享配置
