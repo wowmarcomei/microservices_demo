@@ -15,6 +15,13 @@ spring:
     host: 172.24.238.72
     port: 6379
 
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 172.24.238.72:8848
+        namespace: public
+        group: DEFAULT_GROUP
+
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
   global-config:
