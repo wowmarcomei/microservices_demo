@@ -1,15 +1,11 @@
-# Product Service 专用配置
-# Data ID: product-service.yml
-# Group: DEFAULT_GROUP
-# 配置格式: YAML
-
-# 商品服务数据库配置
 spring:
   datasource:
     url: jdbc:mysql://172.24.238.72:3306/product_db?useSSL=false&serverTimezone=UTC
+    username: root
+    password: my-secret-pw
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
-# 商品服务专用配置
 app:
   config:
-    app-name: "商品服务"
+    app-name: "Product Service"
     stock-warning-threshold: 10

@@ -1,32 +1,30 @@
-# Nacos Config 共享配置文件
-# Data ID: common-config.yml
-# Group: DEFAULT_GROUP
-# 配置格式: YAML
-
-# MySQL数据库配置
 spring:
-  datasource:
-    url: jdbc:mysql://172.24.238.72:3306/{database_name}?useSSL=false&serverTimezone=UTC
-    username: root
-    password: my-secret-pw
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  # Redis配置
   redis:
     host: 172.24.238.72
     port: 6379
 
-# MyBatis Plus配置
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
   global-config:
     db-config:
-      logic-delete-field: deleted # 全局逻辑删除字段
+      logic-delete-field: deleted
 
-# 应用动态配置（演示配置刷新功能）
+logging:
+  level:
+    com.example: debug
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    refresh:
+      enabled: true
+
 app:
   config:
-    app-name: "微服务应用"
+    app-name: "Microservice Application"
     version: "1.0.0"
     environment: "development"
     enable-caching: true
