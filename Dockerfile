@@ -19,18 +19,15 @@ FROM openjdk:8-jre-slim
 
 WORKDIR /app
 
-# 从上一个阶段 (builder) 中，只复制打包好的 jar 文件
-COPY --from=builder /app/target/monolith-app-*.jar app.jar
+# 从上一个阶段 (builder) 中，复制打包好的 jar 文件
+# 使用通配符支持不同的微服务名称
+COPY --from=builder /app/target/*.jar app.jar
 
-# 暴露端口
+# 暴露端口（可通过环境变量覆盖）
 EXPOSE 8080
 
 # 设置JVM参数
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
-
-# 健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # 启动应用
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

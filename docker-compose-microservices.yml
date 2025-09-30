@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # 用户微服务
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: ../Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://172.24.238.72:3306/user_db?useSSL=false&serverTimezone=UTC&characterEncoding=utf8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=my-secret-pw
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SERVER_PORT=8081
+    depends_on:
+      - redis
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # 商品微服务
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: ../Dockerfile
+    container_name: product-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://172.24.238.72:3306/product_db?useSSL=false&serverTimezone=UTC&characterEncoding=utf8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=my-secret-pw
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SERVER_PORT=8082
+    depends_on:
+      - redis
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Redis 缓存
+  redis:
+    image: redis:6-alpine
+    container_name: redis-microservices
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-microservices-data:/data
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # RabbitMQ 消息队列
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-microservices
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-microservices-data:/var/lib/rabbitmq
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+# 数据卷
+volumes:
+  redis-microservices-data:
+  rabbitmq-microservices-data:
+
+# 网络
+networks:
+  microservices-network:
+    driver: bridge
