@@ -1,0 +1,14 @@
+# User Service 专用配置
+# Data ID: user-service.yml
+# Group: DEFAULT_GROUP
+# 配置格式: YAML
+
+# 用户服务数据库配置
+spring:
+  datasource:
+    url: jdbc:mysql://172.24.238.72:3306/user_db?useSSL=false&serverTimezone=UTC
+
+# 用户服务专用配置
+app:
+  config:
+    app-name: "用户服务"

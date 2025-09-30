@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: product-service
+  
+  cloud:
+    nacos:
+      server-addr: 172.24.238.72:8848
+      discovery:
+        server-addr: 172.24.238.72:8848
+        namespace: public
+        group: DEFAULT_GROUP
+      config:
+        server-addr: 172.24.238.72:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        file-extension: yml
+        # 加载共享配置
+        shared-configs:
+          - data-id: common-config.yml
+            group: DEFAULT_GROUP
+            refresh: true
+        # 加载服务专用配置
+        extension-configs:
+          - data-id: product-service.yml
+            group: DEFAULT_GROUP
+            refresh: true

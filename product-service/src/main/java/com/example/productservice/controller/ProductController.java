@@ -3,6 +3,7 @@ package com.example.productservice.controller;
 import com.example.productservice.entity.Product;
 import com.example.productservice.service.ProductService;
 import com.example.productservice.common.Result;
+import com.example.productservice.config.DynamicConfigProperties;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,10 +19,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
+@RefreshScope
 @Tag(name = "商品管理", description = "商品相关接口")
 public class ProductController {
 
     private final ProductService productService;
+    private final DynamicConfigProperties configProperties;
 
     @GetMapping
     @Operation(summary = "获取商品列表")
@@ -82,5 +86,11 @@ public class ProductController {
             return Result.success(true);
         }
         return Result.error("删除商品失败");
+    }
+
+    @GetMapping("/config")
+    @Operation(summary = "获取当前配置信息")
+    public Result<DynamicConfigProperties> getConfig() {
+        return Result.success(configProperties);
     }
 }
