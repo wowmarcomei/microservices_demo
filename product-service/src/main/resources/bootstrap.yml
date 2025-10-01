@@ -22,3 +22,10 @@ spring:
           - data-id: product-service.yml
             group: DEFAULT_GROUP
             refresh: true
+    
+    sentinel:
+      transport:
+        dashboard: localhost:8858
+        port: 8720
+      # 关闭 Context 整合
+      web-context-unify: false
