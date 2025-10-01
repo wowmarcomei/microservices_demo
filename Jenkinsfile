@@ -14,10 +14,6 @@ pipeline {
         
         // 项目信息
         PROJECT_NAME = 'monolith-app'
-        GIT_COMMIT_SHORT = sh(
-            script: "git rev-parse --short HEAD",
-            returnStdout: true
-        ).trim()
     }
     
     // 参数化构建
@@ -48,7 +44,15 @@ pipeline {
                     echo "=========================================="
                     echo "工作目录: ${env.WORKSPACE}"
                     echo "构建编号: ${env.BUILD_NUMBER}"
-                    echo "Git提交: ${GIT_COMMIT_SHORT}"
+                    
+                    // 动态获取Git提交信息
+                    try {
+                        def gitCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                        echo "Git提交: ${gitCommit}"
+                    } catch (Exception e) {
+                        echo "警告: 无法获取Git提交信息 - ${e.getMessage()}"
+                    }
+                    
                     echo "构建类型: ${params.BUILD_TYPE}"
                     echo "跳过测试: ${params.SKIP_TESTS}"
                     echo "推送镜像: ${params.PUSH_IMAGES}"
@@ -116,7 +120,7 @@ pipeline {
         
         stage('单元测试') {
             when {
-                not { params.SKIP_TESTS }
+                expression { !params.SKIP_TESTS }
             }
             steps {
                 echo "🧪 执行单元测试..."
