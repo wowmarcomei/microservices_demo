@@ -1,0 +1,69 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      
+      routes:
+        - id: user-service-route
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - StripPrefix=1
+        
+        - id: product-service-route
+          uri: lb://product-service
+          predicates:
+            - Path=/product-service/**
+          filters:
+            - StripPrefix=1
+            
+        - id: user-direct-route
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/users/**
+        
+        - id: product-direct-route
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/products/**
+      
+
+      default-filters:
+        - AddRequestHeader=X-Gateway-Source, gateway-service
+        
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+
+
+gateway:
+  config:
+    name: "API Gateway Service"
+    version: "1.0.0"
+    description: "API Gateway"
+    
+
+  rate-limit:
+    enabled: true
+    default-capacity: 100
+    default-tokens: 10
+
+
+  auth:
+    enabled: false 
+    jwt-secret: "gateway-jwt-secret-key"
+    token-header: "Authorization"
