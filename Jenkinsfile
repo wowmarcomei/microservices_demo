@@ -3,8 +3,8 @@ pipeline {
     
     // 定义环境变量
     environment {
-        // Maven工具（需要在Jenkins中配置）
-        MAVEN_HOME = tool 'Maven3.8'
+        // Maven工具（使用Jenkins中配置的Maven 3.9.11）
+        MAVEN_HOME = tool 'Maven3.9.11'
         PATH = "${MAVEN_HOME}/bin:${env.PATH}"
         
         // Docker配置
@@ -58,34 +58,13 @@ pipeline {
                     echo "推送镜像: ${params.PUSH_IMAGES}"
                     echo "=========================================="
                     
-                    // 检查工具版本和路径
+                    // 检查工具版本
                     echo "🔧 检查工具版本..."
                     echo "MAVEN_HOME: ${env.MAVEN_HOME}"
                     echo "PATH: ${env.PATH}"
                     
-                    // 检查Java
                     sh 'java -version'
-                    
-                    // 检查Maven - 多种方式尝试
-                    echo "检查Maven安装..."
-                    try {
-                        sh '/opt/maven/bin/mvn -version'
-                        echo "✅ 使用 /opt/maven/bin/mvn 成功"
-                    } catch (Exception e1) {
-                        echo "⚠️ /opt/maven/bin/mvn 不可用，尝试其他路径..."
-                        try {
-                            sh 'mvn -version'
-                            echo "✅ 使用 mvn 命令成功"
-                        } catch (Exception e2) {
-                            echo "❌ Maven不可用，检查可能的安装位置..."
-                            sh 'ls -la /opt/maven/ || echo "/opt/maven 不存在"'
-                            sh 'ls -la /usr/share/maven/ || echo "/usr/share/maven 不存在"'
-                            sh 'which mvn || echo "系统中未找到mvn命令"'
-                            error "Maven工具不可用，请检查安装"
-                        }
-                    }
-                    
-                    // 检查Docker
+                    sh 'mvn -version'
                     sh 'docker --version'
                     
                     // 检查项目结构
@@ -136,22 +115,10 @@ pipeline {
         stage('清理与编译') {
             steps {
                 echo "🧹 清理项目..."
-                script {
-                    try {
-                        sh '/opt/maven/bin/mvn clean'
-                    } catch (Exception e) {
-                        sh 'mvn clean'
-                    }
-                }
+                sh 'mvn clean'
                 
                 echo "🔨 编译项目..."
-                script {
-                    try {
-                        sh '/opt/maven/bin/mvn compile'
-                    } catch (Exception e) {
-                        sh 'mvn compile'
-                    }
-                }
+                sh 'mvn compile'
             }
         }
         
@@ -163,11 +130,7 @@ pipeline {
                 echo "🧪 执行单元测试..."
                 script {
                     try {
-                        try {
-                            sh '/opt/maven/bin/mvn test'
-                        } catch (Exception e1) {
-                            sh 'mvn test'
-                        }
+                        sh 'mvn test'
                     } catch (Exception e) {
                         echo "⚠️ 单元测试失败，但继续构建: ${e.getMessage()}"
                         currentBuild.result = 'UNSTABLE'
@@ -196,13 +159,7 @@ pipeline {
         stage('打包应用') {
             steps {
                 echo "📦 打包微服务应用..."
-                script {
-                    try {
-                        sh '/opt/maven/bin/mvn package -DskipTests'
-                    } catch (Exception e) {
-                        sh 'mvn package -DskipTests'
-                    }
-                }
+                sh 'mvn package -DskipTests'
                 
                 script {
                     echo "✅ 检查生成的JAR文件..."
