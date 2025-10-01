@@ -3,9 +3,12 @@ pipeline {
     
     // 定义环境变量
     environment {
+        // JDK配置 - 使用JDK 8
+        JAVA_HOME = '/opt/jdk8'
+        
         // Maven工具（使用Jenkins中配置的Maven 3.9.11）
         MAVEN_HOME = tool 'Maven3.9.11'
-        PATH = "${MAVEN_HOME}/bin:${env.PATH}"
+        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
         
         // Docker配置
         DOCKER_REGISTRY = 'harbor.example.com' // 替换为你的私有镜像仓库地址
@@ -60,11 +63,19 @@ pipeline {
                     
                     // 检查工具版本
                     echo "🔧 检查工具版本..."
+                    echo "JAVA_HOME: ${env.JAVA_HOME}"
                     echo "MAVEN_HOME: ${env.MAVEN_HOME}"
                     echo "PATH: ${env.PATH}"
                     
+                    // 检查JDK版本
+                    sh 'echo "当前JAVA_HOME: $JAVA_HOME"'
+                    sh 'ls -la $JAVA_HOME/bin/java || echo "JDK 8 不存在"'
                     sh 'java -version'
+                    
+                    // 检查Maven版本
                     sh 'mvn -version'
+                    
+                    // 检查Docker版本
                     sh 'docker --version'
                     
                     // 检查项目结构
