@@ -80,7 +80,17 @@ public class UserController {
 
     @GetMapping("/config")
     @Operation(summary = "获取当前配置信息")
-    public Result<DynamicConfigProperties> getConfig() {
-        return Result.success(configProperties);
+    public Result<Object> getConfig() {
+        // 创建一个简单的配置对象，避免循环引用
+        java.util.Map<String, Object> configMap = new java.util.HashMap<>();
+        configMap.put("appName", configProperties.getAppName());
+        configMap.put("version", configProperties.getVersion());
+        configMap.put("environment", configProperties.getEnvironment());
+        configMap.put("enableCaching", configProperties.isEnableCaching());
+        configMap.put("cacheExpireMinutes", configProperties.getCacheExpireMinutes());
+        configMap.put("maxConnections", configProperties.getMaxConnections());
+        configMap.put("timestamp", java.time.LocalDateTime.now().toString());
+        
+        return Result.success(configMap);
     }
 }
