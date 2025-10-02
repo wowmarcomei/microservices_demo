@@ -97,7 +97,7 @@ config/application-prod.yml
 # Database
 *.db
 *.sqlite
-*.sql
+
 
 # OS generated files
 .DS_Store
