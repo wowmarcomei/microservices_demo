@@ -444,6 +444,75 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3
 
 ## 🔍 故障排查
 
+### GitHub Actions构建失败修复 🔧
+
+#### 问题分析
+
+**本地构建成功 ✅**  
+本地构建使用正确的构建方式：
+```bash
+# 从根目录构建，使用 -f 参数指定Dockerfile位置
+docker build -f "$service/Dockerfile" -t "test-$service:latest" . --no-cache
+```
+
+**GitHub Actions 失败 ❌**  
+错误配置：
+```yaml
+context: ./${{ matrix.service }}  # 错误：子目录作为构建上下文
+file: ./${{ matrix.service }}/Dockerfile
+```
+
+错误原因：进入子目录构建缺少父项目依赖，无法访问根目录的 `pom.xml` 和其他微服务模块。
+
+#### 修复方案
+
+**1. 修改构建上下文**
+```yaml
+# 修复前
+context: ./${{ matrix.service }}
+
+# 修复后
+context: .  # 从根目录构建
+```
+
+**2. 修改编译方式**
+```yaml
+# 修复前
+run: |
+  cd ${{ matrix.service }}
+  mvn clean package -B -DskipTests=true
+
+# 修复后  
+run: |
+  # 从根目录编译指定模块（与本地构建方式一致）
+  mvn clean package -B -DskipTests=true -pl ${{ matrix.service }}
+```
+
+#### 关键原因 📋
+
+Spring Boot微服务项目的Dockerfile需要访问：
+1. **父项目pom.xml** - 多模块项目依赖管理
+2. **其他微服务pom.xml** - 依赖解析和下载
+3. **完整的项目结构** - Maven模块化构建
+
+#### 构建方式对比
+
+| 构建方式 | 本地测试 | GitHub Actions修复前 | GitHub Actions修复后 |
+|---------|---------|-------------------|-------------------|
+| 构建上下文 | 根目录(.) | 子目录(./$service) | 根目录(.) ✅ |
+| Dockerfile路径 | -f $service/Dockerfile | ./$service/Dockerfile | ./$service/Dockerfile |
+| Maven编译 | -pl $service | cd $service && mvn | -pl $service ✅ |
+| 结果 | ✅ 成功 | ❌ 失败 | ✅ 成功 |
+
+#### 验证方式 ✅
+
+推送代码后GitHub Actions应该能够成功构建所有微服务镜像：
+```bash
+git add .
+git commit -m "fix: 修复GitHub Actions微服务构建上下文问题"
+git push origin main
+```
+
 ### 常见问题
 
 **1. Maven构建失败**

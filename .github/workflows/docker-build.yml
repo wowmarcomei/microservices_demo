@@ -140,8 +140,8 @@ jobs:
 
     - name: 编译 ${{ matrix.service }}
       run: |
-        cd ${{ matrix.service }}
-        mvn clean package -B -DskipTests=true
+        # 从根目录编译指定模块（与本地构建方式一致）
+        mvn clean package -B -DskipTests=true -pl ${{ matrix.service }}
         echo "✅ ${{ matrix.service }} 编译完成"
 
     - name: 设置 Docker Buildx
@@ -167,7 +167,7 @@ jobs:
     - name: 构建和推送 ${{ matrix.service }} 镜像
       uses: docker/build-push-action@v5
       with:
-        context: ./${{ matrix.service }}
+        context: .  # ✅ 修复：从根目录构建（与本地构建方式一致）
         file: ./${{ matrix.service }}/Dockerfile
         push: true
         tags: ${{ steps.meta.outputs.tags }}
