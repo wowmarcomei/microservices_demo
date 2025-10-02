@@ -1,5 +1,29 @@
-# User Service Dockerfile - Jenkins Pipeline 优化版
-# 使用轻量级的OpenJDK 8运行时
+# User Service Dockerfile - 简化构建版本
+# 适用于在项目根目录构建：docker build -f user-service/Dockerfile .
+
+# 构建阶段
+FROM maven:3.8-openjdk-8 AS builder
+
+WORKDIR /app
+
+# 复制父项目pom.xml
+COPY pom.xml .
+
+# 复制所有子模块的pom.xml先（优化缓存）
+COPY user-service/pom.xml ./user-service/
+COPY product-service/pom.xml ./product-service/
+COPY gateway-service/pom.xml ./gateway-service/
+
+# 下载依赖（缓存层）
+RUN mvn dependency:go-offline -pl user-service
+
+# 复制user-service源码
+COPY user-service/src ./user-service/src
+
+# 构建当前服务
+RUN mvn clean package -DskipTests -pl user-service
+
+# 运行阶段 - 使用轻量级的OpenJDK 8运行时
 FROM openjdk:8-jre-slim
 
 # 设置维护者信息
@@ -13,8 +37,8 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 # 设置工作目录
 WORKDIR /app
 
-# 复制构建好的JAR文件（从Jenkins的target目录）
-COPY target/user-service-*.jar app.jar
+# 从构建阶段复制JAR文件
+COPY --from=builder /app/user-service/target/user-service-*.jar app.jar
 
 # 修改文件权限
 RUN chown appuser:appuser app.jar
