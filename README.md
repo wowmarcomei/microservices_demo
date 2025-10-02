@@ -1,321 +1,250 @@
-# 电商单体应用 - 从单体到微服务实战
+# 微服务架构学习项目
 
-## 项目简介
+本项目是一个完整的Spring Boot微服务架构学习项目，从单体应用演进到微服务架构，涵盖了服务注册发现、配置中心、网关、限流熔断等微服务核心组件。
 
-本项目是"从单体到微服务 —— Spring Boot 应用重构实战"课程的第二章实战项目，实现了一个完整的电商单体应用。该应用包含用户管理、商品管理、Redis缓存集成、API文档等功能。
+## 📁 项目结构
 
-## 技术栈
-
-- **框架**: Spring Boot 2.7.5
-- **数据库**: MySQL 5.7
-- **缓存**: Redis 6-alpine
-- **消息队列**: RabbitMQ 3-management
-- **ORM框架**: MyBatis Plus 3.5.2
-- **API文档**: SpringDoc OpenAPI
-- **构建工具**: Maven 3.6.3
-- **开发工具**: Lombok
-
-## 项目结构
-
+### 🗂 核心业务模块
 ```
-monolith-app/
-├── src/main/java/com/example/monolithapp/
-│   ├── controller/          # 控制器层
-│   │   ├── UserController.java
-│   │   ├── ProductController.java
-│   │   └── ConfigController.java
-│   ├── service/            # 服务层
-│   │   ├── UserService.java
-│   │   ├── ProductService.java
-│   │   └── impl/
-│   ├── mapper/             # 数据访问层
-│   │   ├── UserMapper.java
-│   │   └── ProductMapper.java
-│   ├── entity/             # 实体类
-│   │   ├── User.java
-│   │   └── Product.java
-│   ├── config/             # 配置类
-│   │   ├── RedisConfig.java
-│   │   └── MybatisPlusConfig.java
-│   ├── common/             # 通用类
-│   │   └── Result.java
-│   └── MonolithAppApplication.java
-├── src/main/resources/
-│   ├── application.yml     # 应用配置
-│   └── db/
-│       ├── schema.sql      # 数据库结构脚本
-│       └── schema_utf8.sql # UTF-8编码数据库结构脚本
-└── pom.xml                 # Maven依赖配置
+├── user-service/           # 用户服务
+├── product-service/        # 商品服务
+├── gateway-service/        # 网关服务
+└── src/                   # 原单体应用代码
 ```
 
-## 环境要求
+### 📚 文档目录 (docs/)
+```
+docs/
+├── project/               # 项目相关文档
+│   └── 项目总体说明.md     # 项目整体介绍和架构
+├── tutorials/             # 教程文档
+│   ├── 微服务开发完整课程.md # 完整的微服务开发教程
+│   ├── 1-springboot-单体应用.md
+│   └── 1-springboot-单体应用README-Docker.md
+├── guides/                # 操作指南
+│   ├── Docker部署指南.md   # Docker容器化部署
+│   ├── Docker-Build-Guide.md # Docker构建完整指南
+│   ├── Gateway-Learning-Guide.md # 网关学习指南
+│   ├── Jenkins-Build-Fix-Guide.md
+│   ├── Jenkins-GitHub-Quick-Setup.md
+│   ├── Jenkins-Local-Git-Setup.md
+│   └── Jenkins-Pipeline-Guide.md
+└── microservices/         # 微服务专项文档
+    ├── README-Nacos.md    # Nacos配置说明
+    ├── microservice-startup-success.md
+    ├── Nacos-Config-Guide.md
+    ├── Nacos-Config-Test-Guide.md
+    ├── Sentinel-Complete-Guide.md
+    ├── Sentinel-Dashboard-Setup.md
+    ├── Sentinel-Getting-Started.md
+    ├── Sentinel-Integration-Summary.md
+    └── Sentinel-Learning-Guide.md
+```
 
-### 必需软件
-- JDK 1.8+
-- Maven 3.6+
-- Docker 20+
-- MySQL 客户端 (如 Navicat)
+### 🔧 脚本目录 (scripts/)
+```
+scripts/
+├── build/                 # 构建相关脚本
+│   ├── test-build-comprehensive.sh  # 综合构建测试脚本
+│   └── test-pipeline.sh   # 流水线测试脚本
+├── startup/               # 启动相关脚本
+│   ├── start-sentinel-dashboard.bat
+│   └── start-sentinel-docker.bat
+├── test/                  # 测试相关脚本
+└── windows/               # Windows批处理文件
+    ├── test-gateway.bat
+    ├── test-nacos-config-cn.bat
+    ├── test-nacos-config.bat
+    ├── test-sentinel-integration.bat
+    └── verify-sentinel-config.bat
+```
 
-### 中间件服务
-通过 Docker 启动以下服务：
+### 📦 配置文件
+```
+├── docker-compose.yml     # Docker Compose配置
+├── docker-compose-microservices.yml
+├── Dockerfile            # 多服务Docker构建
+├── Jenkinsfile          # Jenkins流水线配置
+├── init-microservices-db.sql  # 数据库初始化脚本
+├── .github/workflows/    # GitHub Actions CI/CD
+└── nacos-config-templates/ # Nacos配置模板
+```
 
-#### 1. MySQL 数据库
+## 🚀 快速开始
+
+### 0. 数据库初始化 📊
+
+项目提供了完整的数据库初始化脚本 `init-microservices-db.sql`，用于：
+
+#### 🗃️ 数据库结构
+```sql
+-- 创建两个独立的微服务数据库
+user_db      # 用户服务数据库
+product_db   # 商品服务数据库
+```
+
+#### 📋 数据表说明
+
+**用户数据库 (user_db)**
+- `users` - 用户信息表
+  - 支持用户名、邮箱、手机号等完整用户信息
+  - 包含状态管理和逻辑删除
+  - 自动时间戳管理
+
+**商品数据库 (product_db)**
+- `categories` - 商品分类表（支持多级分类）
+- `brands` - 品牌信息表
+- `products` - 商品信息表
+  - 完整的商品属性（名称、价格、库存、状态等）
+  - 关联分类和品牌
+  - category_id字段特殊用作创建者用户ID（演示服务间调用）
+
+#### 🔧 初始化步骤
+
+**方式1: 直接执行SQL脚本**
 ```bash
-docker run --name my-mysql \
-  -v mysql-data:/var/lib/mysql \
+# 连接MySQL数据库
+mysql -u root -p
+
+# 执行初始化脚本
+source init-microservices-db.sql
+```
+
+**方式2: 使用Docker MySQL**
+```bash
+# 启动MySQL容器
+docker run -d --name mysql-microservices \
+  -e MYSQL_ROOT_PASSWORD=123456 \
+  -e MYSQL_DATABASE=user_db \
   -p 3306:3306 \
-  -e MYSQL_ROOT_PASSWORD=my-secret-pw \
-  -d mysql:5.7
+  mysql:8.0
+
+# 等待MySQL启动完成
+sleep 30
+
+# 执行初始化脚本
+docker exec -i mysql-microservices mysql -uroot -p123456 < init-microservices-db.sql
 ```
 
-#### 2. Redis 缓存
+**方式3: 使用数据库管理工具**
+- 使用Navicat、DBeaver、phpMyAdmin等工具
+- 导入 `init-microservices-db.sql` 文件
+- 执行脚本完成初始化
+
+#### 📊 测试数据
+
+脚本会自动插入测试数据：
+
+**用户数据 (3条)**
+- admin (管理员) - admin@example.com
+- testuser (测试用户) - test@example.com  
+- john (普通用户) - john@example.com
+
+**商品数据 (5条)**
+- iPhone 14 Pro - ¥7999.00
+- Samsung Galaxy S23 - ¥6999.00
+- 华为Mate 50 Pro - ¥6499.00
+- iPhone 14 - ¥5999.00
+- MacBook Pro - ¥14999.00
+
+**分类数据 (3条)**
+- 电子产品、手机数码、服装鞋包
+
+**品牌数据 (3条)**
+- Apple、Samsung、Huawei
+
+#### 🔍 数据验证
+
+初始化完成后，脚本会自动显示数据统计：
+```sql
+-- 验证结果示例
+用户数据库 - 用户数量: 3
+商品数据库 - 商品数量: 5  
+商品数据库 - 分类数量: 3
+商品数据库 - 品牌数量: 3
+```
+
+#### ⚠️ 注意事项
+
+1. **数据迁移支持** - 如果已有 `monolith_db` 数据库，脚本会自动迁移现有数据
+2. **数据安全** - 使用 `INSERT IGNORE` 避免重复插入
+3. **字符编码** - 统一使用 `utf8mb4` 支持emoji和特殊字符
+4. **索引优化** - 为查询字段创建了必要的索引
+5. **逻辑删除** - 支持软删除，数据安全性更高
+
+### 1. 构建测试
 ```bash
-docker run --name my-redis \
-  -p 6379:6379 \
-  -d redis:6-alpine
+# 运行综合构建测试
+chmod +x scripts/build/test-build-comprehensive.sh
+./scripts/build/test-build-comprehensive.sh
 ```
 
-#### 3. RabbitMQ 消息队列
+### 2. 服务启动
 ```bash
-docker run --name my-rabbitmq \
-  -p 5672:5672 \
-  -p 15672:15672 \
-  -d rabbitmq:3-management
+# 启动Nacos服务注册中心
+docker run -d --name nacos -p 8848:8848 nacos/nacos-server
+
+# 启动Sentinel控制台
+./scripts/startup/start-sentinel-dashboard.bat
+
+# 使用Docker Compose启动所有微服务
+docker-compose -f docker-compose-microservices.yml up -d
 ```
 
-## 项目启动
+### 3. 验证服务
+- **Nacos控制台**: http://localhost:8848/nacos (nacos/nacos)
+- **Sentinel控制台**: http://localhost:8080 (sentinel/sentinel)  
+- **用户服务**: http://localhost:8081
+- **商品服务**: http://localhost:8082
+- **网关服务**: http://localhost:9090
 
-### 1. 数据库初始化
+## 📖 学习路径
 
-使用 Navicat 或 MySQL 命令行工具执行 `src/main/resources/db/schema_utf8.sql` 脚本创建数据库和表结构。
+### 阶段1: 基础准备
+1. 阅读 `docs/project/项目总体说明.md` 了解项目架构
+2. 学习 `docs/tutorials/微服务开发完整课程.md` 掌握理论基础
+3. **执行 `init-microservices-db.sql` 初始化数据库** 📊
 
-### 2. 启动中间件服务
+### 阶段2: 环境搭建
+1. 参考 `docs/guides/Docker部署指南.md` 配置Docker环境
+2. 使用 `scripts/build/test-build-comprehensive.sh` 验证构建环境
 
-确保上述 Docker 容器都已正常运行。
+### 阶段3: 微服务开发
+1. 服务注册发现: `docs/microservices/README-Nacos.md`
+2. 服务网关: `docs/guides/Gateway-Learning-Guide.md`
+3. 流量控制: `docs/microservices/Sentinel-Complete-Guide.md`
 
-### 3. 修改配置文件
+### 阶段4: DevOps实践
+1. CI/CD流水线: `docs/guides/Jenkins-Pipeline-Guide.md`
+2. 容器化部署: `docs/guides/Docker-Build-Guide.md`
 
-根据您的环境修改 `application.yml` 中的连接配置：
+## 🛠 开发工具
 
-```yaml
-datasource:
-  url: jdbc:mysql://172.24.238.72:3306/monolith_db?useSSL=false&serverTimezone=UTC
-  username: root
-  password: my-secret-pw
-  driver-class-name: com.mysql.cj.jdbc.Driver
+- **IDE**: IntelliJ IDEA 推荐
+- **Java**: JDK 8+
+- **构建工具**: Maven 3.6+
+- **容器**: Docker + Docker Compose
+- **注册中心**: Nacos
+- **网关**: Spring Cloud Gateway
+- **限流熔断**: Sentinel
+- **CI/CD**: Jenkins / GitHub Actions
 
-redis:
-  host: 172.24.238.72
-  port: 6379
+## 📞 技术支持
 
-rabbitmq:
-  host: 172.24.238.72
-  port: 5672
-  username: guest
-  password: guest
-```
+如遇到问题，请参考相应的文档：
+- 构建问题: `docs/guides/Docker-Build-Guide.md`
+- 配置问题: `docs/microservices/Nacos-Config-Guide.md`
+- 部署问题: `docs/guides/Jenkins-Build-Fix-Guide.md`
 
-### 4. 编译和运行应用
+## 🎯 项目特色
 
-```bash
-# 编译项目
-mvn compile
+- ✅ **完整的微服务架构演进路径**
+- ✅ **详细的学习文档和操作指南**
+- ✅ **自动化构建和部署脚本**
+- ✅ **Docker容器化支持**
+- ✅ **CI/CD流水线集成**
+- ✅ **生产级配置和最佳实践**
 
-# 运行应用
-mvn spring-boot:run
-```
+---
 
-应用启动后，可以通过以下地址访问：
-- 应用主页: http://localhost:8080
-- API文档: http://localhost:8080/swagger-ui/index.html
-- RabbitMQ管理界面: http://localhost:15672 (guest/guest)
-
-## API 接口
-
-### 用户管理接口
-
-#### 获取用户列表
-```bash
-GET /users
-```
-
-#### 根据ID获取用户
-```bash
-GET /users/{id}
-```
-
-#### 创建用户
-```bash
-POST /users
-Content-Type: application/json
-
-{
-  "username": "testuser",
-  "password": "password",
-  "email": "test@example.com"
-}
-```
-
-#### 更新用户
-```bash
-PUT /users/{id}
-Content-Type: application/json
-
-{
-  "username": "updateduser",
-  "email": "updated@example.com"
-}
-```
-
-#### 删除用户
-```bash
-DELETE /users/{id}
-```
-
-### 商品管理接口
-
-#### 获取商品列表
-```bash
-GET /products
-```
-
-#### 根据ID获取商品
-```bash
-GET /products/{id}
-```
-
-#### 创建商品
-```bash
-POST /products
-Content-Type: application/json
-
-{
-  "name": "新商品",
-  "description": "商品描述",
-  "price": 99.99,
-  "stock": 100,
-  "categoryId": 1,
-  "brandId": 1
-}
-```
-
-#### 更新商品
-```bash
-PUT /products/{id}
-Content-Type: application/json
-
-{
-  "name": "更新后的商品",
-  "price": 199.99,
-  "stock": 50
-}
-```
-
-#### 删除商品
-```bash
-DELETE /products/{id}
-```
-
-### 配置管理接口
-
-#### 获取配置信息
-```bash
-GET /config/greeting
-GET /config/feature-status
-```
-
-### 响应格式
-
-所有接口都返回统一格式的 JSON 响应：
-
-```json
-{
-  "code": 200,
-  "message": "操作成功",
-  "data": {
-    // 具体数据
-  }
-}
-```
-
-## Redis 缓存
-
-### 缓存配置
-- 用户信息缓存键名: `users:{id}`
-- 默认缓存过期时间: 30分钟
-
-### 缓存注解
-- `@Cacheable`: 缓存查询结果
-- `@CachePut`: 更新缓存
-- `@CacheEvict`: 删除缓存
-
-## 数据库设计
-
-### 用户表 (users)
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | BIGINT | 用户ID (主键) |
-| username | VARCHAR(50) | 用户名 |
-| password | VARCHAR(255) | 密码 |
-| email | VARCHAR(100) | 邮箱 |
-| created_time | DATETIME | 创建时间 |
-| updated_time | DATETIME | 更新时间 |
-| deleted | TINYINT | 逻辑删除标记 |
-
-### 商品表 (products)
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | BIGINT | 商品ID (主键) |
-| name | VARCHAR(100) | 商品名称 |
-| description | TEXT | 商品描述 |
-| price | DECIMAL(10,2) | 商品价格 |
-| stock | INT | 库存数量 |
-| category_id | BIGINT | 分类ID |
-| brand_id | BIGINT | 品牌ID |
-| created_time | DATETIME | 创建时间 |
-| updated_time | DATETIME | 更新时间 |
-| deleted | TINYINT | 逻辑删除标记 |
-
-## 开发指南
-
-### 添加新模块
-1. 在 `entity` 包中创建实体类
-2. 在 `mapper` 包中创建 Mapper 接口
-3. 在 `service` 包中创建 Service 接口和实现
-4. 在 `controller` 包中创建 Controller
-5. 添加对应的缓存注解和 API 文档注解
-
-### 数据库迁移
-1. 修改 `schema_utf8.sql` 文件
-2. 使用 Navicat 执行更新脚本
-
-### 配置管理
-修改 `application.yml` 文件中的配置项，重启应用即可生效。
-
-## 常见问题
-
-### 1. 数据库连接失败
-- 检查 Docker 容器是否运行
-- 确认数据库连接参数是否正确
-- 检查防火墙设置
-
-### 2. Redis 连接失败
-- 检查 Redis 容器是否运行
-- 确认 Redis 连接参数
-
-### 3. 应用启动失败
-- 检查端口 8080 是否被占用
-- 检查依赖是否完整
-- 查看 application.yml 配置
-
-### 4. 中文乱码
-- 确保使用 UTF-8 编码
-- 执行 schema_utf8.sql 脚本而非 schema.sql
-
-## 课程学习
-
-本项目对应"从单体到微服务 —— Spring Boot 应用重构实战"课程的第二章，后续课程将介绍如何将此单体应用逐步重构为微服务架构。
-
-## 许可证
-
-本项目仅供学习使用。
+> 这是一个学习项目，适合初学者掌握微服务架构的设计理念和实现技术。通过实践操作，可以深入理解微服务架构的核心概念和关键技术。

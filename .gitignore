@@ -156,3 +156,17 @@ out/
 .env.local
 .env.development
 .env.production
+
+# Scripts output
+scripts/logs/
+scripts/temp/
+*.output
+*.result
+
+# Documentation temporary files
+docs/temp/
+docs/*.tmp
+
+# Local build results
+local_build.txt
+test_results.txt
